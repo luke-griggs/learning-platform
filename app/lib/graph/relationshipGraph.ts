@@ -68,9 +68,19 @@ export function findPath(
       if (relatedId === toId) {
         // Found the destination
         const fullPath = [...current.path, toId]
-        return fullPath
-          .map((id) => topics.get(id))
-          .filter((t): t is Topic => t !== undefined)
+        const resolvedPath: Topic[] = []
+
+        // Validate all topics in path exist - return empty if any are missing
+        for (const id of fullPath) {
+          const pathTopic = topics.get(id)
+          if (!pathTopic) {
+            // Missing intermediate topic - path is broken
+            return []
+          }
+          resolvedPath.push(pathTopic)
+        }
+
+        return resolvedPath
       }
 
       if (!visited.has(relatedId)) {

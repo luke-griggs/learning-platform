@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(bun run:*)",
+      "Bash(bun add:*)",
+      "mcp__context7__:*"
+    ]
+  }
+}
