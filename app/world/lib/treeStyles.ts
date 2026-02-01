@@ -5,7 +5,7 @@ import type { GrowthStageConfig, SubjectStyleModifiers } from '../types/trees'
 export const GROWTH_STAGE_CONFIGS: Record<GrowthStage, GrowthStageConfig> = {
   seedling: {
     stage: 'seedling',
-    scale: 0.4,
+    scale: 0.8,
     complexity: 1,
     hasGlow: false,
     trunkHeight: 12,
@@ -13,7 +13,7 @@ export const GROWTH_STAGE_CONFIGS: Record<GrowthStage, GrowthStageConfig> = {
   },
   sapling: {
     stage: 'sapling',
-    scale: 0.6,
+    scale: 1.0,
     complexity: 2,
     hasGlow: false,
     trunkHeight: 25,
@@ -21,7 +21,7 @@ export const GROWTH_STAGE_CONFIGS: Record<GrowthStage, GrowthStageConfig> = {
   },
   young: {
     stage: 'young',
-    scale: 0.8,
+    scale: 1.2,
     complexity: 4,
     hasGlow: false,
     trunkHeight: 40,
@@ -29,7 +29,7 @@ export const GROWTH_STAGE_CONFIGS: Record<GrowthStage, GrowthStageConfig> = {
   },
   mature: {
     stage: 'mature',
-    scale: 1.0,
+    scale: 1.5,
     complexity: 6,
     hasGlow: false,
     trunkHeight: 55,
@@ -37,7 +37,7 @@ export const GROWTH_STAGE_CONFIGS: Record<GrowthStage, GrowthStageConfig> = {
   },
   ancient: {
     stage: 'ancient',
-    scale: 1.3,
+    scale: 1.8,
     complexity: 8,
     hasGlow: true,
     trunkHeight: 70,
