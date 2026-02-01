@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, createContext, useContext, useEffect, useState } from 'react'
+import { useMemo, createContext, useContext, useRef } from 'react'
 import { Application, extend } from '@pixi/react'
 import { Container, Graphics } from 'pixi.js'
 import { useUserStore, useTopicStore } from '@/app/lib/store'
@@ -9,13 +9,12 @@ import { useKeyboard } from '../hooks/useKeyboard'
 import { useGameLoop } from '../hooks/useGameLoop'
 import { Camera } from './Camera'
 import { Ground } from './Ground'
-import { Particles } from './Particles'
 import { Player } from './Player'
 import { Orb } from './Orb'
 import { TreeContainer } from './trees/TreeContainer'
 import { TrailContainer } from './trails/TrailContainer'
-import { WORLD_CONFIG, THEME_CONFIGS, DEFAULT_THEME } from '../constants'
-import type { WorldContextValue, RenderableEntity, SubjectTheme } from '../types'
+import { WORLD_CONFIG } from '../constants'
+import type { WorldContextValue, RenderableEntity } from '../types'
 
 // Extend PixiJS components for React
 extend({ Container, Graphics })
@@ -43,7 +42,6 @@ function WorldContent() {
   useGameLoop({ input })
 
   const currentSubjectSquare = useUserStore((state) => state.currentSubjectSquare)
-  const subjectSquares = useTopicStore((state) => state.subjectSquares)
   const topics = useTopicStore((state) => state.topics)
 
   // Handle tree click - dispatches event for tree interface
@@ -52,13 +50,6 @@ function WorldContent() {
       new CustomEvent('tree:click', { detail: { topicId } })
     )
   }
-
-  // Determine current theme from subject square
-  const theme: SubjectTheme | undefined = useMemo(() => {
-    if (!currentSubjectSquare) return undefined
-    const square = subjectSquares.get(currentSubjectSquare)
-    return square?.theme
-  }, [currentSubjectSquare, subjectSquares])
 
   // Get registered entities from store, grouped by layer
   const entities = useWorldStore((state) => state.entities)
@@ -87,8 +78,8 @@ function WorldContent() {
 
   return (
     <Camera>
-      {/* Layer 1: Ground and background patterns */}
-      <Ground theme={theme} />
+      {/* Layer 1: Ground border */}
+      <Ground />
       {entityLayers.ground.map((entity) => (
         <pixiGraphics
           key={entity.id}
@@ -126,8 +117,7 @@ function WorldContent() {
       {/* Layer 3.5: Orb (when carrying) */}
       <Orb />
 
-      {/* Layer 4: Effects (particles, companion) */}
-      <Particles theme={theme} />
+      {/* Layer 4: Effects */}
       {entityLayers.effects.map((entity) => (
         <pixiGraphics
           key={entity.id}
@@ -151,12 +141,7 @@ interface WorldCanvasProps {
 export function WorldCanvas({ className }: WorldCanvasProps) {
   const registerEntity = useWorldStore((state) => state.registerEntity)
   const unregisterEntity = useWorldStore((state) => state.unregisterEntity)
-  const [mounted, setMounted] = useState(false)
-
-  // Ensure we only render on client
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  const containerRef = useRef<HTMLDivElement>(null)
 
   const contextValue: WorldContextValue = useMemo(
     () => ({
@@ -167,29 +152,18 @@ export function WorldCanvas({ className }: WorldCanvasProps) {
     [registerEntity, unregisterEntity]
   )
 
-  // Get theme for background color
-  const currentSubjectSquare = useUserStore((state) => state.currentSubjectSquare)
-  const subjectSquares = useTopicStore((state) => state.subjectSquares)
-
-  const backgroundColor = useMemo(() => {
-    if (!currentSubjectSquare) return DEFAULT_THEME.backgroundColor
-    const square = subjectSquares.get(currentSubjectSquare)
-    if (!square) return DEFAULT_THEME.backgroundColor
-    return THEME_CONFIGS[square.theme].backgroundColor
-  }, [currentSubjectSquare, subjectSquares])
-
-  if (!mounted) {
-    return null
-  }
-
   return (
     <WorldContext.Provider value={contextValue}>
-      <div className={className} style={{ width: '100%', height: '100%' }}>
+      <div
+        ref={containerRef}
+        className={className}
+        style={{ width: '100%', height: '100%', position: 'relative', background: '#FAF9F7' }}
+      >
         <Application
-          resizeTo={window}
-          background={backgroundColor}
+          resizeTo={containerRef}
+          backgroundAlpha={0}
           antialias={true}
-          resolution={window.devicePixelRatio || 1}
+          resolution={typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1}
           autoDensity={true}
         >
           <WorldContent />

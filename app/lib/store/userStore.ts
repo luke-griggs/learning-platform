@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { Position } from '@/app/lib/types'
+import { WORLD_CONFIG } from '@/app/world/constants'
 
 type UserState = {
   // Current navigation state
@@ -20,7 +21,11 @@ type UserState = {
   resetOnboarding: () => void
 }
 
-const DEFAULT_POSITION: Position = { x: 0, y: 0 }
+// Start player in the center of the world
+const DEFAULT_POSITION: Position = {
+  x: WORLD_CONFIG.width / 2,
+  y: WORLD_CONFIG.height / 2,
+}
 const DEFAULT_COMPANION_STYLE = 'wisp'
 
 export const useUserStore = create<UserState>()(

@@ -3,22 +3,25 @@
 import { useMemo } from 'react'
 import type { SubjectSquare, Topic, SubjectTheme } from '@/app/lib/types'
 
-// Theme colors for map squares (CSS hex values)
-const THEME_COLORS: Record<SubjectTheme, { bg: string; border: string; dot: string }> = {
+// Theme colors for map squares - light theme compatible
+const THEME_COLORS: Record<SubjectTheme, { bg: string; border: string; dot: string; activeBorder: string }> = {
   crystalline: {
-    bg: 'bg-blue-950/60',
-    border: 'border-blue-500/50',
-    dot: 'bg-blue-400',
+    bg: 'bg-blue-100',
+    border: 'border-blue-200',
+    dot: 'bg-blue-500',
+    activeBorder: 'border-blue-500',
   },
   organic: {
-    bg: 'bg-green-950/60',
-    border: 'border-green-500/50',
-    dot: 'bg-green-400',
+    bg: 'bg-green-100',
+    border: 'border-green-200',
+    dot: 'bg-green-500',
+    activeBorder: 'border-green-500',
   },
   angular: {
-    bg: 'bg-orange-950/60',
-    border: 'border-orange-500/50',
-    dot: 'bg-orange-400',
+    bg: 'bg-orange-100',
+    border: 'border-orange-200',
+    dot: 'bg-orange-500',
+    activeBorder: 'border-orange-500',
   },
 }
 
@@ -60,12 +63,12 @@ export function MapSquare({
       className={`
         ${squareSize}
         ${colors.bg}
-        border ${isCurrent ? 'border-white/80 border-2' : colors.border}
-        rounded-sm
+        border-2 ${isCurrent ? colors.activeBorder : colors.border}
+        rounded-lg
         relative
         overflow-hidden
         transition-all duration-200
-        hover:brightness-125
+        hover:scale-105 hover:shadow-sm
         ${onClick ? 'cursor-pointer' : 'cursor-default'}
       `}
       title={square.name}
@@ -79,7 +82,6 @@ export function MapSquare({
             ${dotSize}
             ${colors.dot}
             rounded-full
-            opacity-80
           `}
           style={{
             left: `${topic.x}%`,
@@ -92,20 +94,13 @@ export function MapSquare({
       {/* Current location indicator */}
       {isCurrent && (
         <div
-          className="absolute w-2 h-2 bg-white rounded-full animate-pulse"
+          className="absolute w-2 h-2 bg-[var(--accent)] rounded-full animate-pulse"
           style={{
             left: '50%',
             top: '50%',
             transform: 'translate(-50%, -50%)',
           }}
         />
-      )}
-
-      {/* Label in expanded mode */}
-      {isExpanded && (
-        <span className="absolute bottom-0 left-0 right-0 text-[8px] text-white/70 text-center truncate px-0.5">
-          {square.name}
-        </span>
       )}
     </button>
   )

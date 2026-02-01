@@ -19,14 +19,13 @@ export type {
   WorldConfig,
   RenderableEntity,
   WorldContextValue,
-  ThemeConfig,
   RenderLayer,
   CameraState,
   InputState,
 } from './types'
 
 // World constants
-export { WORLD_CONFIG, THEME_CONFIGS, DEFAULT_THEME } from './constants'
+export { WORLD_CONFIG } from './constants'
 
 // ============================================
 // Trees & Trails (Feature 02)

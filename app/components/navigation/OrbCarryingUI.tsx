@@ -96,23 +96,23 @@ export function OrbCarryingUI() {
     <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-40">
       <div
         className="
-          bg-black/70 backdrop-blur-md
-          border border-white/20
-          rounded-xl
-          px-6 py-4
+          bg-[var(--surface)]
+          shadow-[var(--shadow-lg)]
+          rounded-2xl
+          px-6 py-5
           text-center
           animate-fade-in
         "
       >
         {/* Topic name */}
-        <p className="text-white/90 mb-2">
-          Planting: <span className="font-medium text-green-400">{pendingTopicName}</span>
+        <p className="text-[var(--foreground)] mb-2">
+          Planting: <span className="font-medium text-[var(--accent)]">{pendingTopicName}</span>
         </p>
 
         {/* Instructions */}
-        <p className="text-white/50 text-sm mb-3">
+        <p className="text-[var(--foreground-secondary)] text-sm mb-4">
           Move to choose a location, then press{' '}
-          <kbd className="px-1.5 py-0.5 bg-white/10 rounded text-white/80 text-xs">
+          <kbd className="px-1.5 py-0.5 bg-[var(--background-secondary)] rounded text-[var(--foreground)] text-xs font-medium">
             E
           </kbd>{' '}
           to plant
@@ -123,11 +123,12 @@ export function OrbCarryingUI() {
           <button
             onClick={handlePlace}
             className="
-              px-4 py-2
-              bg-green-600/80 hover:bg-green-600
-              rounded-lg
-              text-white text-sm
-              transition-colors
+              px-5 py-2.5
+              bg-[var(--accent)] hover:bg-[var(--accent-hover)]
+              rounded-xl
+              text-white text-sm font-medium
+              transition-all duration-200
+              hover:scale-105
             "
           >
             Plant Here
@@ -135,11 +136,12 @@ export function OrbCarryingUI() {
           <button
             onClick={cancelOrbCarrying}
             className="
-              px-4 py-2
-              bg-white/10 hover:bg-white/20
-              rounded-lg
-              text-white/70 text-sm
-              transition-colors
+              px-5 py-2.5
+              bg-[var(--background-secondary)] hover:bg-[var(--background-tertiary)]
+              border border-[var(--border)]
+              rounded-xl
+              text-[var(--foreground-secondary)] text-sm
+              transition-all duration-200
             "
           >
             Cancel
@@ -147,9 +149,9 @@ export function OrbCarryingUI() {
         </div>
 
         {/* Keyboard hints */}
-        <p className="text-white/30 text-xs mt-3">
-          <kbd className="px-1 py-0.5 bg-white/5 rounded">E</kbd> to plant,{' '}
-          <kbd className="px-1 py-0.5 bg-white/5 rounded">Esc</kbd> to cancel
+        <p className="text-[var(--foreground-muted)] text-xs mt-4">
+          <kbd className="px-1.5 py-0.5 bg-[var(--background-secondary)] rounded font-medium">E</kbd> to plant,{' '}
+          <kbd className="px-1.5 py-0.5 bg-[var(--background-secondary)] rounded font-medium">Esc</kbd> to cancel
         </p>
       </div>
     </div>

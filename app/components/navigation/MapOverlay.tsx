@@ -10,10 +10,10 @@ interface MapOverlayProps {
   className?: string
 }
 
-const THEME_OPTIONS: { value: SubjectTheme; label: string; color: string }[] = [
-  { value: 'crystalline', label: 'Crystalline', color: '#4488ff' },
-  { value: 'organic', label: 'Organic', color: '#44ff88' },
-  { value: 'angular', label: 'Angular', color: '#ff8844' },
+const THEME_OPTIONS: { value: SubjectTheme; label: string; color: string; bg: string }[] = [
+  { value: 'crystalline', label: 'Crystalline', color: '#4488ff', bg: 'bg-blue-50' },
+  { value: 'organic', label: 'Organic', color: '#44ff88', bg: 'bg-green-50' },
+  { value: 'angular', label: 'Angular', color: '#ff8844', bg: 'bg-orange-50' },
 ]
 
 export function MapOverlay({ className }: MapOverlayProps) {
@@ -129,13 +129,13 @@ export function MapOverlay({ className }: MapOverlayProps) {
         <div
           className="
             w-24 h-24
-            bg-black/50 backdrop-blur-sm
-            rounded-lg
-            border border-white/20
+            bg-[var(--surface)]
+            rounded-xl
+            shadow-[var(--shadow-md)]
             p-2
             cursor-pointer
-            hover:bg-black/60
-            transition-colors
+            hover:shadow-[var(--shadow-lg)]
+            transition-shadow duration-200
             grid gap-1
           "
           style={{
@@ -155,7 +155,7 @@ export function MapOverlay({ className }: MapOverlayProps) {
         </div>
 
         {/* Keyboard hint */}
-        <div className="text-[10px] text-white/40 text-center mt-1">
+        <div className="text-[10px] text-[var(--foreground-muted)] text-center mt-1.5">
           Press M
         </div>
       </div>
@@ -163,7 +163,7 @@ export function MapOverlay({ className }: MapOverlayProps) {
       {/* Expanded map overlay */}
       {mapExpanded && (
         <div
-          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center"
+          className="fixed inset-0 z-50 bg-[var(--foreground)]/40 backdrop-blur-sm flex items-center justify-center"
           onClick={(e) => {
             // Close when clicking backdrop
             if (e.target === e.currentTarget) {
@@ -171,8 +171,8 @@ export function MapOverlay({ className }: MapOverlayProps) {
             }
           }}
         >
-          <div className="bg-black/60 rounded-2xl border border-white/20 p-8 max-w-2xl">
-            <h2 className="text-white text-xl font-light mb-6 text-center">
+          <div className="bg-[var(--surface)] rounded-2xl shadow-[var(--shadow-lg)] p-8 max-w-2xl animate-scale-in">
+            <h2 className="text-[var(--foreground)] text-xl font-medium mb-6 text-center">
               Your Worlds
             </h2>
 
@@ -192,8 +192,8 @@ export function MapOverlay({ className }: MapOverlayProps) {
                     isExpanded={true}
                     onClick={handleTeleport}
                   />
-                  <span className="text-white/70 text-sm">{square.name}</span>
-                  <span className="text-white/40 text-xs">
+                  <span className="text-[var(--foreground-secondary)] text-sm font-medium">{square.name}</span>
+                  <span className="text-[var(--foreground-muted)] text-xs">
                     {getTopicsBySubject(square.id).length} topics
                   </span>
                 </div>
@@ -205,17 +205,17 @@ export function MapOverlay({ className }: MapOverlayProps) {
                   onClick={() => setShowAddModal(true)}
                   className="
                     w-24 h-24
-                    rounded-lg
-                    border-2 border-dashed border-white/30
-                    bg-white/5
-                    hover:bg-white/10 hover:border-white/50
-                    transition-all
+                    rounded-xl
+                    border-2 border-dashed border-[var(--border)]
+                    bg-[var(--background-secondary)]
+                    hover:bg-[var(--background-tertiary)] hover:border-[var(--foreground-muted)]
+                    transition-all duration-200
                     flex items-center justify-center
                     group
                   "
                 >
                   <svg
-                    className="w-8 h-8 text-white/40 group-hover:text-white/70 transition-colors"
+                    className="w-8 h-8 text-[var(--foreground-muted)] group-hover:text-[var(--foreground-secondary)] transition-colors"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -228,12 +228,12 @@ export function MapOverlay({ className }: MapOverlayProps) {
                     />
                   </svg>
                 </button>
-                <span className="text-white/50 text-sm">New World</span>
+                <span className="text-[var(--foreground-tertiary)] text-sm">New World</span>
               </div>
             </div>
 
             {/* Close hint */}
-            <p className="text-white/40 text-sm text-center">
+            <p className="text-[var(--foreground-muted)] text-sm text-center">
               Click a world to teleport, or press Escape to close
             </p>
           </div>
@@ -243,30 +243,31 @@ export function MapOverlay({ className }: MapOverlayProps) {
       {/* Add new square modal */}
       {showAddModal && (
         <div
-          className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-md flex items-center justify-center"
+          className="fixed inset-0 z-[60] bg-[var(--foreground)]/40 backdrop-blur-sm flex items-center justify-center"
           onClick={(e) => {
             if (e.target === e.currentTarget) {
               setShowAddModal(false)
             }
           }}
         >
-          <div className="bg-black/80 rounded-2xl border border-white/20 p-6 w-80">
-            <h3 className="text-white text-lg font-light mb-4">Create New World</h3>
+          <div className="bg-[var(--surface)] rounded-2xl shadow-[var(--shadow-lg)] p-6 w-96 animate-scale-in">
+            <h3 className="text-[var(--foreground)] text-lg font-medium mb-4">Create New World</h3>
 
             {/* Name input */}
             <div className="mb-4">
-              <label className="block text-white/60 text-sm mb-2">World Name</label>
+              <label className="block text-[var(--foreground-secondary)] text-sm mb-2">World Name</label>
               <input
                 type="text"
                 value={newSquareName}
                 onChange={(e) => setNewSquareName(e.target.value)}
                 placeholder="e.g., Mathematics"
                 className="
-                  w-full px-3 py-2
-                  bg-white/10 border border-white/20
-                  rounded-lg
-                  text-white placeholder-white/40
-                  focus:outline-none focus:border-white/40
+                  w-full px-4 py-3
+                  bg-[var(--background)] border border-[var(--border)]
+                  rounded-xl
+                  text-[var(--foreground)] placeholder-[var(--foreground-muted)]
+                  focus:outline-none focus:border-[var(--foreground-tertiary)]
+                  transition-colors
                 "
                 autoFocus
                 onKeyDown={(e) => {
@@ -282,28 +283,29 @@ export function MapOverlay({ className }: MapOverlayProps) {
 
             {/* Theme selection */}
             <div className="mb-6">
-              <label className="block text-white/60 text-sm mb-2">Theme</label>
+              <label className="block text-[var(--foreground-secondary)] text-sm mb-2">Theme</label>
               <div className="flex gap-2">
                 {THEME_OPTIONS.map((theme) => (
                   <button
                     key={theme.value}
                     onClick={() => setNewSquareTheme(theme.value)}
                     className={`
-                      flex-1 py-2 px-3
-                      rounded-lg
-                      border transition-all
+                      flex-1 py-3 px-3
+                      rounded-xl
+                      border-2 transition-all duration-200
+                      ${theme.bg}
                       ${
                         newSquareTheme === theme.value
-                          ? 'border-white/60 bg-white/10'
-                          : 'border-white/20 bg-white/5 hover:bg-white/10'
+                          ? 'border-[var(--accent)] scale-105'
+                          : 'border-transparent hover:border-[var(--border)]'
                       }
                     `}
                   >
                     <div
-                      className="w-4 h-4 rounded-full mx-auto mb-1"
+                      className="w-4 h-4 rounded-full mx-auto mb-1.5"
                       style={{ backgroundColor: theme.color }}
                     />
-                    <span className="text-white/70 text-xs">{theme.label}</span>
+                    <span className="text-[var(--foreground-secondary)] text-xs font-medium">{theme.label}</span>
                   </button>
                 ))}
               </div>
@@ -314,12 +316,12 @@ export function MapOverlay({ className }: MapOverlayProps) {
               <button
                 onClick={() => setShowAddModal(false)}
                 className="
-                  flex-1 py-2
-                  rounded-lg
-                  border border-white/20
-                  text-white/60
-                  hover:bg-white/10
-                  transition-colors
+                  flex-1 py-2.5
+                  rounded-xl
+                  border border-[var(--border)]
+                  text-[var(--foreground-secondary)]
+                  hover:bg-[var(--background-secondary)]
+                  transition-all duration-200
                 "
               >
                 Cancel
@@ -328,13 +330,13 @@ export function MapOverlay({ className }: MapOverlayProps) {
                 onClick={handleCreateSquare}
                 disabled={!newSquareName.trim()}
                 className="
-                  flex-1 py-2
-                  rounded-lg
-                  bg-white/20
-                  text-white
-                  hover:bg-white/30
+                  flex-1 py-2.5
+                  rounded-xl
+                  bg-[var(--accent)]
+                  text-white font-medium
+                  hover:bg-[var(--accent-hover)]
                   disabled:opacity-40 disabled:cursor-not-allowed
-                  transition-colors
+                  transition-all duration-200
                 "
               >
                 Create

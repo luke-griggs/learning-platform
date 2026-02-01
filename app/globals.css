@@ -226,3 +226,8 @@ body {
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: var(--foreground-muted);
 }
+
+/* Force PixiJS canvas transparency (scope to the world canvas only) */
+[data-world-layer="pixi"] canvas {
+  background: transparent !important;
+}

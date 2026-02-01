@@ -74,25 +74,26 @@ export function NewTopicButton({ className }: NewTopicButtonProps) {
         onClick={() => setShowModal(true)}
         className={`
           fixed top-4 right-4 z-40
-          px-4 py-2
-          bg-white/10 hover:bg-white/20
-          backdrop-blur-sm
-          border border-white/20
-          rounded-lg
-          text-white text-sm font-medium
-          transition-colors
+          px-4 py-2.5
+          bg-[var(--surface)]
+          shadow-[var(--shadow-md)]
+          hover:shadow-[var(--shadow-lg)]
+          rounded-xl
+          text-[var(--foreground)] text-sm font-medium
+          transition-all duration-200
           flex items-center gap-2
+          group
           ${className}
         `}
       >
-        <span className="text-lg leading-none">+</span>
+        <span className="text-lg leading-none text-[var(--accent)] group-hover:scale-110 transition-transform">+</span>
         New Topic
       </button>
 
       {/* Modal */}
       {showModal && (
         <div
-          className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center"
+          className="fixed inset-0 z-50 bg-[var(--foreground)]/40 backdrop-blur-sm flex items-center justify-center"
           onClick={(e) => {
             if (e.target === e.currentTarget) {
               setShowModal(false)
@@ -100,11 +101,11 @@ export function NewTopicButton({ className }: NewTopicButtonProps) {
             }
           }}
         >
-          <div className="bg-black/80 border border-white/20 rounded-2xl p-8 w-full max-w-md">
-            <h2 className="text-white text-xl font-light mb-2">
+          <div className="bg-[var(--surface)] rounded-2xl shadow-[var(--shadow-lg)] p-8 w-full max-w-md animate-scale-in">
+            <h2 className="text-[var(--foreground)] text-xl font-medium mb-2">
               Create New Topic
             </h2>
-            <p className="text-white/50 text-sm mb-6">
+            <p className="text-[var(--foreground-secondary)] text-sm mb-6">
               What would you like to learn about?
             </p>
 
@@ -118,12 +119,12 @@ export function NewTopicButton({ className }: NewTopicButtonProps) {
                 className="
                   w-full
                   px-4 py-3
-                  bg-white/5
-                  border border-white/20
-                  rounded-lg
-                  text-white
-                  placeholder:text-white/30
-                  focus:outline-none focus:border-white/40
+                  bg-[var(--background)]
+                  border border-[var(--border)]
+                  rounded-xl
+                  text-[var(--foreground)]
+                  placeholder:text-[var(--foreground-muted)]
+                  focus:outline-none focus:border-[var(--foreground-tertiary)]
                   transition-colors
                 "
                 autoComplete="off"
@@ -138,12 +139,12 @@ export function NewTopicButton({ className }: NewTopicButtonProps) {
                   }}
                   className="
                     flex-1
-                    px-4 py-2
-                    bg-white/5 hover:bg-white/10
-                    border border-white/20
-                    rounded-lg
-                    text-white/70
-                    transition-colors
+                    px-4 py-2.5
+                    bg-[var(--background-secondary)] hover:bg-[var(--background-tertiary)]
+                    border border-[var(--border)]
+                    rounded-xl
+                    text-[var(--foreground-secondary)]
+                    transition-all duration-200
                   "
                 >
                   Cancel
@@ -153,13 +154,12 @@ export function NewTopicButton({ className }: NewTopicButtonProps) {
                   disabled={!topicName.trim()}
                   className="
                     flex-1
-                    px-4 py-2
-                    bg-white/20 hover:bg-white/30
-                    disabled:bg-white/5 disabled:text-white/30
-                    border border-white/20
-                    rounded-lg
-                    text-white
-                    transition-colors
+                    px-4 py-2.5
+                    bg-[var(--accent)] hover:bg-[var(--accent-hover)]
+                    disabled:bg-[var(--background-tertiary)] disabled:text-[var(--foreground-muted)]
+                    rounded-xl
+                    text-white font-medium
+                    transition-all duration-200
                   "
                 >
                   Create
@@ -167,7 +167,7 @@ export function NewTopicButton({ className }: NewTopicButtonProps) {
               </div>
             </form>
 
-            <p className="text-white/30 text-xs text-center mt-4">
+            <p className="text-[var(--foreground-muted)] text-xs text-center mt-4">
               Press Escape to cancel
             </p>
           </div>
