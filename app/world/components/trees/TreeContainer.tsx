@@ -4,6 +4,7 @@ import { useCallback, useState, useMemo } from 'react'
 import { extend } from '@pixi/react'
 import { Container } from 'pixi.js'
 import { useTopicStore } from '@/app/lib/store'
+import type { Topic } from '@/app/lib/types'
 
 // Register PixiJS components for React (v8 pattern)
 extend({ Container })
@@ -26,13 +27,20 @@ export function TreeContainer({
   const [hoveredTopicId, setHoveredTopicId] = useState<string | null>(null)
 
   // Get topics for current subject square from store
-  const getTopicsBySubject = useTopicStore((state) => state.getTopicsBySubject)
+  // Subscribe to the topics Map directly for reactivity
+  const allTopics = useTopicStore((state) => state.topics)
   const getSubjectSquare = useTopicStore((state) => state.getSubjectSquare)
 
-  const topics = useMemo(
-    () => getTopicsBySubject(subjectSquare),
-    [getTopicsBySubject, subjectSquare]
-  )
+  // Filter topics by subject square - recomputes when topics Map changes
+  const topics = useMemo(() => {
+    const result: Topic[] = []
+    allTopics.forEach((topic) => {
+      if (topic.subjectSquare === subjectSquare) {
+        result.push(topic)
+      }
+    })
+    return result
+  }, [allTopics, subjectSquare])
 
   const subjectData = getSubjectSquare(subjectSquare)
   const subjectName = subjectData?.name ?? 'default'

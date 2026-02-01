@@ -4,7 +4,8 @@
       "Bash(mkdir:*)",
       "Bash(bun run:*)",
       "Bash(bun add:*)",
-      "mcp__context7__:*"
+      "mcp__context7__:*",
+      "Bash(npx tsc:*)"
     ]
   }
 }

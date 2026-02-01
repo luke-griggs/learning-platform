@@ -11,6 +11,9 @@ import { Camera } from './Camera'
 import { Ground } from './Ground'
 import { Particles } from './Particles'
 import { Player } from './Player'
+import { Orb } from './Orb'
+import { TreeContainer } from './trees/TreeContainer'
+import { TrailContainer } from './trails/TrailContainer'
 import { WORLD_CONFIG, THEME_CONFIGS, DEFAULT_THEME } from '../constants'
 import type { WorldContextValue, RenderableEntity, SubjectTheme } from '../types'
 
@@ -41,6 +44,14 @@ function WorldContent() {
 
   const currentSubjectSquare = useUserStore((state) => state.currentSubjectSquare)
   const subjectSquares = useTopicStore((state) => state.subjectSquares)
+  const topics = useTopicStore((state) => state.topics)
+
+  // Handle tree click - dispatches event for tree interface
+  const handleTreeClick = (topicId: string) => {
+    window.dispatchEvent(
+      new CustomEvent('tree:click', { detail: { topicId } })
+    )
+  }
 
   // Determine current theme from subject square
   const theme: SubjectTheme | undefined = useMemo(() => {
@@ -87,7 +98,19 @@ function WorldContent() {
         />
       ))}
 
-      {/* Layer 2: Main entities (trees, trails) */}
+      {/* Layer 2: Trees and trails */}
+      {currentSubjectSquare && (
+        <>
+          <TrailContainer subjectSquare={currentSubjectSquare} />
+          <TreeContainer
+            subjectSquare={currentSubjectSquare}
+            onTreeClick={handleTreeClick}
+            key={topics.size} // Force re-render when topics change
+          />
+        </>
+      )}
+
+      {/* Layer 2b: Registered entities */}
       {entityLayers.main.map((entity) => (
         <pixiGraphics
           key={entity.id}
@@ -99,6 +122,9 @@ function WorldContent() {
 
       {/* Layer 3: Player */}
       <Player />
+
+      {/* Layer 3.5: Orb (when carrying) */}
+      <Orb />
 
       {/* Layer 4: Effects (particles, companion) */}
       <Particles theme={theme} />

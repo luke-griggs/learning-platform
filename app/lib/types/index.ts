@@ -1,3 +1,6 @@
+// Re-export navigation types
+export * from './navigation'
+
 // Core position type for world coordinates
 export type Position = {
   x: number

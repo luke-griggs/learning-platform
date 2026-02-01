@@ -9,6 +9,13 @@ bun run dev      # Start development server at http://localhost:3000
 bun run build    # Create production build
 bun start        # Run production server
 bun run lint     # Run ESLint
+npx tsc          # Run TypeScript type checking
+```
+
+### After Major Changes
+Run type checking and build verification after significant code changes:
+```bash
+npx tsc --noEmit && bun run build
 ```
 
 ## Tech Stack
@@ -34,6 +41,36 @@ Use `@/` prefix for imports from project root (configured in tsconfig.json).
 - Dark mode supported via CSS variables (`--background`, `--foreground`)
 - Theme automatically responds to `prefers-color-scheme: dark`
 - Geist Sans and Geist Mono fonts pre-configured
+
+## Zustand Patterns
+
+### Selector Reactivity
+When subscribing to Zustand state, **subscribe to data, not functions**:
+
+```typescript
+// BAD - won't re-render when topics change (function reference is stable)
+const getTopicsBySubject = useTopicStore((state) => state.getTopicsBySubject)
+const topics = useMemo(() => getTopicsBySubject(id), [getTopicsBySubject, id])
+
+// GOOD - re-renders when topics Map changes
+const allTopics = useTopicStore((state) => state.topics)
+const topics = useMemo(() => {
+  const result: Topic[] = []
+  allTopics.forEach((topic) => {
+    if (topic.subjectSquare === id) result.push(topic)
+  })
+  return result
+}, [allTopics, id])
+```
+
+### PixiJS + useTick
+The `useTick` callback receives a `Ticker` object, not a delta number:
+```typescript
+useTick((ticker) => {
+  const deltaSeconds = ticker.deltaMS / 1000
+  // use deltaSeconds for frame-rate independent animation
+})
+```
 
 ## Project Context
 
