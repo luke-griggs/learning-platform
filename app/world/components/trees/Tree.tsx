@@ -2,19 +2,15 @@
 
 import { useCallback, useEffect, useRef } from 'react'
 import { extend } from '@pixi/react'
-import { Container, Graphics, Text, FederatedPointerEvent, TextStyle } from 'pixi.js'
+import { Container, Sprite, Text, FederatedPointerEvent, TextStyle } from 'pixi.js'
 
 // Register PixiJS components for React (v8 pattern)
-extend({ Container, Graphics, Text })
+extend({ Container, Sprite, Text })
+
 import type { Topic } from '@/app/lib/types'
 import { getGrowthStage } from '@/app/lib/types'
-import {
-  drawTree,
-  drawHoverHighlight,
-  drawGlowEffect,
-} from '../../lib/treeGeometry'
-import { GROWTH_STAGE_CONFIGS, getStyleForSubject } from '../../lib/treeStyles'
-import { useGrowthAnimation } from '../../hooks/useGrowthAnimation'
+import { getTextureForStage } from '../../lib/assetLoader'
+import { ASSET_CONFIGS } from '../../lib/assetPaths'
 import type { TreeInteractionEvent } from '../../types/trees'
 
 type TreeProps = {
@@ -28,7 +24,7 @@ type TreeProps = {
 const labelStyle = new TextStyle({
   fontFamily: 'system-ui, -apple-system, sans-serif',
   fontSize: 11,
-  fill: 0xcccccc,
+  fill: 0x666666,
   align: 'center',
 })
 
@@ -36,7 +32,7 @@ const labelStyle = new TextStyle({
 const tooltipStyle = new TextStyle({
   fontFamily: 'system-ui, -apple-system, sans-serif',
   fontSize: 13,
-  fill: 0xffffff,
+  fill: 0x333333,
   align: 'center',
   fontWeight: 'bold',
 })
@@ -47,59 +43,31 @@ export function Tree({
   isHovered,
   onInteraction,
 }: TreeProps) {
-  const graphicsRef = useRef<Graphics>(null)
+  const spriteRef = useRef<Sprite>(null)
 
   const currentStage = getGrowthStage(topic.engagementScore)
-  const stageConfig = GROWTH_STAGE_CONFIGS[currentStage]
-  const styleModifiers = getStyleForSubject(subjectName)
-
-  // Animation hook for smooth growth transitions
-  const { animProgress } = useGrowthAnimation(topic.id, topic.engagementScore)
-
-  // Draw the tree whenever state changes
-  const draw = useCallback(
-    (g: Graphics) => {
-      g.clear()
-
-      // Draw glow effect for ancient trees (behind tree)
-      if (stageConfig.hasGlow) {
-        drawGlowEffect(
-          g,
-          stageConfig.crownRadius,
-          stageConfig.trunkHeight,
-          styleModifiers.accentColor
-        )
-      }
-
-      // Draw the tree itself
-      drawTree(g, currentStage, styleModifiers, animProgress)
-
-      // Add hover highlight
-      if (isHovered) {
-        drawHoverHighlight(g, stageConfig.crownRadius, stageConfig.trunkHeight)
-      }
-    },
-    [currentStage, styleModifiers, animProgress, isHovered, stageConfig]
-  )
+  const assetConfig = ASSET_CONFIGS[currentStage]
+  const texture = getTextureForStage(currentStage)
 
   // Set up hit area for click detection
   useEffect(() => {
-    if (graphicsRef.current) {
-      const g = graphicsRef.current
-      g.eventMode = 'static'
-      g.cursor = 'pointer'
+    if (spriteRef.current) {
+      const sprite = spriteRef.current
+      sprite.eventMode = 'static'
+      sprite.cursor = 'pointer'
 
-      // Create circular hit area slightly larger than visual bounds
-      const hitRadius = stageConfig.crownRadius * stageConfig.scale + 15
-      const centerY = (-stageConfig.trunkHeight * stageConfig.scale) / 2
+      // Create circular hit area based on config
+      const hitRadius = assetConfig.hitRadius
 
-      g.hitArea = {
+      sprite.hitArea = {
         contains: (x: number, y: number) => {
+          // Hit area centered on sprite
+          const centerY = -sprite.height * assetConfig.anchorY / 2
           return Math.sqrt(x * x + (y - centerY) ** 2) <= hitRadius
         },
       }
     }
-  }, [stageConfig])
+  }, [assetConfig])
 
   const handleClick = useCallback(
     (e: FederatedPointerEvent) => {
@@ -132,23 +100,23 @@ export function Tree({
     })
   }, [topic, onInteraction])
 
-  // Calculate label position (below the tree)
-  const labelY = 10 // Below trunk base
-
   // Truncate long topic names for the label
   const truncatedName =
     topic.name.length > 16 ? topic.name.slice(0, 14) + '...' : topic.name
 
+  // Calculate sprite height for tooltip positioning (estimate based on scale)
+  const estimatedHeight = 150 * assetConfig.scale
+
   return (
-    <pixiContainer
-      x={topic.position.x}
-      y={topic.position.y}
-      scale={stageConfig.scale}
-    >
-      {/* Tree graphics */}
-      <pixiGraphics
-        ref={graphicsRef}
-        draw={draw}
+    <pixiContainer x={topic.position.x} y={topic.position.y}>
+      {/* Sprite-based image */}
+      <pixiSprite
+        ref={spriteRef}
+        texture={texture}
+        anchor={{ x: 0.5, y: assetConfig.anchorY }}
+        scale={assetConfig.scale}
+        alpha={isHovered ? 1.0 : 0.9}
+        tint={isHovered ? 0xffffff : 0xfafafa}
         onClick={handleClick}
         onPointerOver={handlePointerOver}
         onPointerOut={handlePointerOut}
@@ -159,7 +127,7 @@ export function Tree({
         text={truncatedName}
         style={labelStyle}
         anchor={{ x: 0.5, y: 0 }}
-        y={labelY}
+        y={assetConfig.labelOffset}
         alpha={0.8}
       />
 
@@ -169,7 +137,7 @@ export function Tree({
           text={topic.name}
           style={tooltipStyle}
           anchor={{ x: 0.5, y: 1 }}
-          y={-stageConfig.trunkHeight - 20}
+          y={-estimatedHeight - 10}
           alpha={1}
         />
       )}

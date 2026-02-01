@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, createContext, useContext, useRef } from 'react'
+import { useMemo, createContext, useContext, useRef, useState, useEffect } from 'react'
 import { Application, extend } from '@pixi/react'
 import { Container, Graphics } from 'pixi.js'
 import { useUserStore, useTopicStore } from '@/app/lib/store'
@@ -14,6 +14,8 @@ import { Orb } from './Orb'
 import { TreeContainer } from './trees/TreeContainer'
 import { TrailContainer } from './trails/TrailContainer'
 import { WORLD_CONFIG } from '../constants'
+import { loadTreeAssets } from '../lib/assetLoader'
+import { seedDemoTopics, clearSubjectTopics, levelUpExistingTopics } from '@/app/lib/seedDemoData'
 import type { WorldContextValue, RenderableEntity } from '../types'
 
 // Extend PixiJS components for React
@@ -38,11 +40,48 @@ export function useWorld(): WorldContextValue {
  * Handles the game loop and renders all world elements.
  */
 function WorldContent() {
+  const [assetsReady, setAssetsReady] = useState(false)
+  const currentSubjectSquare = useUserStore((state) => state.currentSubjectSquare)
+  const topics = useTopicStore((state) => state.topics)
+
   const input = useKeyboard()
   useGameLoop({ input })
 
-  const currentSubjectSquare = useUserStore((state) => state.currentSubjectSquare)
-  const topics = useTopicStore((state) => state.topics)
+  // Preload tree assets before rendering
+  useEffect(() => {
+    loadTreeAssets().then(() => setAssetsReady(true))
+  }, [])
+
+  // Dev mode: Ctrl+Shift+D to seed demo topics, Ctrl+Shift+C to clear
+  useEffect(() => {
+    if (process.env.NODE_ENV !== 'development') return
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!currentSubjectSquare) return
+
+      if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+        e.preventDefault()
+        seedDemoTopics(currentSubjectSquare)
+        console.log('[Dev] Seeded demo topics for:', currentSubjectSquare)
+      }
+
+      if (e.ctrlKey && e.shiftKey && e.key === 'C') {
+        e.preventDefault()
+        clearSubjectTopics(currentSubjectSquare)
+        console.log('[Dev] Cleared topics for:', currentSubjectSquare)
+      }
+
+      // Ctrl+Shift+L to level up existing topics
+      if (e.ctrlKey && e.shiftKey && e.key === 'L') {
+        e.preventDefault()
+        levelUpExistingTopics(currentSubjectSquare)
+        console.log('[Dev] Leveled up existing topics for:', currentSubjectSquare)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [currentSubjectSquare])
 
   // Handle tree click - dispatches event for tree interface
   const handleTreeClick = (topicId: string) => {
@@ -90,7 +129,7 @@ function WorldContent() {
       ))}
 
       {/* Layer 2: Trees and trails */}
-      {currentSubjectSquare && (
+      {currentSubjectSquare && assetsReady && (
         <>
           <TrailContainer subjectSquare={currentSubjectSquare} />
           <TreeContainer

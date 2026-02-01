@@ -40,34 +40,18 @@ export { TrailContainer } from './components/trails/TrailContainer'
 
 // Hooks
 export {
-  useGrowthAnimation,
-  useGrowthComplete,
-} from './hooks/useGrowthAnimation'
-export {
   useTreeInteraction,
   useTreeClickListener,
 } from './hooks/useTreeInteraction'
 
 // Utilities
 export {
-  drawTree,
-  drawSeedling,
-  drawSapling,
-  drawYoungTree,
-  drawMatureTree,
-  drawAncientTree,
-  drawHoverHighlight,
-  drawGlowEffect,
-} from './lib/treeGeometry'
-export {
-  GROWTH_STAGE_CONFIGS,
   SUBJECT_STYLE_MODIFIERS,
   getStyleForSubject,
   getThemeForSubject,
-  getInterpolatedStageConfig,
-  getNextStage,
-  getPreviousStage,
 } from './lib/treeStyles'
+export { GROWTH_STAGE_ASSETS, ASSET_CONFIGS } from './lib/assetPaths'
+export { loadTreeAssets, getTextureForStage, areAssetsLoaded } from './lib/assetLoader'
 export {
   drawTrail,
   calculateBezierControlPoints,
@@ -77,9 +61,7 @@ export {
 
 // Types
 export type {
-  GrowthStageConfig,
   SubjectStyleModifiers,
-  TreeVisualState,
   TrailConnection,
   TreeInteractionEvent,
 } from './types/trees'
