@@ -19,8 +19,8 @@ export function ConversationList({ topicId, activeId, onSelect }: ConversationLi
   if (conversations.length === 0) {
     return (
       <div className="px-4 py-8 text-center">
-        <p className="text-sm text-white/40">No conversations yet</p>
-        <p className="text-xs text-white/30 mt-1">
+        <p className="text-[14px] text-[var(--foreground-muted)]">No conversations yet</p>
+        <p className="text-[12px] text-[var(--foreground-muted)] mt-1">
           Start a new chat to begin learning
         </p>
       </div>

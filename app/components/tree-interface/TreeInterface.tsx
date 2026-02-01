@@ -8,32 +8,41 @@ import { ChatView } from './ChatView'
 
 function Header({ topicName, onClose }: { topicName: string; onClose: () => void }) {
   return (
-    <header className="flex items-center justify-between h-16 px-6 border-b border-white/10">
+    <header className="flex items-center justify-between h-14 px-4 bg-[var(--surface)]">
       <button
         onClick={onClose}
-        className="flex items-center gap-2 text-sm text-white/60 hover:text-white transition-colors"
+        className="
+          flex items-center gap-2 px-3 py-2 -ml-3 rounded-lg
+          text-[14px] text-[var(--foreground-secondary)]
+          hover:text-[var(--foreground)] hover:bg-[var(--background-secondary)]
+          transition-all duration-150
+          group
+        "
       >
         <svg
           width="16"
           height="16"
           viewBox="0 0 16 16"
           fill="none"
-          className="rotate-180"
+          className="text-[var(--foreground-tertiary)] group-hover:text-[var(--foreground-secondary)] transition-colors"
         >
           <path
-            d="M6 3L11 8L6 13"
+            d="M10 3L5 8L10 13"
             stroke="currentColor"
             strokeWidth="1.5"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
         </svg>
-        Back to Forest
+        Back
       </button>
 
-      <h1 className="text-lg font-medium text-white">{topicName}</h1>
+      <h1 className="text-[15px] font-medium text-[var(--foreground)]">
+        {topicName}
+      </h1>
 
-      <div className="w-24" /> {/* Spacer for centering */}
+      {/* Spacer for centering */}
+      <div className="w-20" />
     </header>
   )
 }
@@ -51,12 +60,12 @@ export function TreeInterface() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.3, ease: 'easeInOut' }}
+          transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
           className="fixed inset-0 z-50 bg-[var(--background)]"
         >
           <Header topicName={topic.name} onClose={closeTopic} />
 
-          <div className="flex h-[calc(100vh-64px)]">
+          <div className="flex h-[calc(100vh-56px)]">
             <Sidebar topic={topic} />
             <ChatView />
           </div>

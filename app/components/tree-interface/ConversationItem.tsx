@@ -41,22 +41,31 @@ export function ConversationItem({
     <button
       onClick={onSelect}
       className={`
-        w-full px-4 py-3 text-left transition-colors
+        w-full px-3 py-3 text-left rounded-lg mx-1 transition-all duration-150
         ${isActive
-          ? 'bg-white/10 border-l-2 border-white/50'
-          : 'hover:bg-white/5 border-l-2 border-transparent'
+          ? 'bg-[var(--background-secondary)]'
+          : 'hover:bg-[var(--background-secondary)]/60'
         }
       `}
+      style={{ width: 'calc(100% - 8px)' }}
     >
       <div className="flex items-start justify-between gap-2">
-        <h3 className="text-sm font-medium text-white/90 truncate flex-1">
+        <h3
+          className={`
+            text-[14px] truncate flex-1 leading-snug
+            ${isActive
+              ? 'font-medium text-[var(--foreground)]'
+              : 'text-[var(--foreground-secondary)]'
+            }
+          `}
+        >
           {conversation.title}
         </h3>
-        <span className="text-[10px] text-white/40 shrink-0">
+        <span className="text-[11px] text-[var(--foreground-muted)] shrink-0 mt-0.5">
           {formatRelativeTime(conversation.updatedAt)}
         </span>
       </div>
-      <p className="text-xs text-white/50 mt-1 line-clamp-2">
+      <p className="text-[12px] text-[var(--foreground-tertiary)] mt-1 line-clamp-2 leading-snug">
         {preview}
       </p>
     </button>

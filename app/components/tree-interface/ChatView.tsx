@@ -36,46 +36,102 @@ function generateTitle(message: string): string {
   return cleaned.slice(0, 47).trim() + '...'
 }
 
+/** Spark icon for typing indicator */
+function SparkIcon({ className }: { className?: string }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className={className}>
+      <path
+        d="M10 2C10 2 10.5 6 10 8C12 8 16 8 16 8C16 8 12 8.5 10 9C10 11 10 16 10 16C10 16 9.5 11 10 9C8 9 4 9 4 9C4 9 8 8.5 10 8C10 6 10 2 10 2Z"
+        fill="currentColor"
+      />
+    </svg>
+  )
+}
+
 function TypingIndicator() {
   return (
-    <div className="flex justify-start">
-      <div className="bg-white/5 rounded-2xl rounded-bl-sm px-4 py-3">
-        <div className="flex gap-1">
-          <span className="w-2 h-2 bg-white/40 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-          <span className="w-2 h-2 bg-white/40 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-          <span className="w-2 h-2 bg-white/40 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-        </div>
+    <div className="flex items-start gap-3 animate-fade-in">
+      <div className="shrink-0 mt-0.5">
+        <SparkIcon className="text-[var(--accent)]" />
+      </div>
+      <div className="flex gap-1.5 py-2">
+        <span className="w-2 h-2 bg-[var(--foreground-muted)] rounded-full typing-dot" />
+        <span className="w-2 h-2 bg-[var(--foreground-muted)] rounded-full typing-dot" />
+        <span className="w-2 h-2 bg-[var(--foreground-muted)] rounded-full typing-dot" />
       </div>
     </div>
   )
 }
 
-function EmptyState({ onNewChat }: { onNewChat: () => void }) {
+/** No conversation selected - prompt to select or create */
+function NoConversationState({ onNewChat }: { onNewChat: () => void }) {
   return (
     <div className="flex-1 flex flex-col items-center justify-center text-center px-8">
-      <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" className="text-white/40">
-          <path
-            d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+      {/* Spark icon */}
+      <div className="mb-6">
+        <SparkIcon className="w-10 h-10 text-[var(--accent)]" />
       </div>
-      <h3 className="text-lg font-medium text-white/80 mb-2">
+
+      <h3 className="text-xl font-medium text-[var(--foreground)] mb-2">
         Start a conversation
       </h3>
-      <p className="text-sm text-white/50 max-w-sm mb-6">
+      <p className="text-[15px] text-[var(--foreground-secondary)] max-w-sm mb-8 leading-relaxed">
         Select a conversation from the sidebar or start a new one to begin exploring this topic.
       </p>
       <button
         onClick={onNewChat}
-        className="px-4 py-2 bg-white/10 hover:bg-white/15 text-white text-sm rounded-lg transition-colors"
+        className="
+          px-5 py-2.5 rounded-xl text-[15px] font-medium
+          bg-[var(--accent)] text-white
+          hover:bg-[var(--accent-hover)]
+          transition-all duration-200 ease-out
+          hover:scale-105 hover:-translate-y-0.5
+          active:scale-95
+        "
       >
         New Conversation
       </button>
+    </div>
+  )
+}
+
+/** Get greeting based on time of day */
+function getGreeting(): string {
+  const hour = new Date().getHours()
+  if (hour < 12) return 'Good morning'
+  if (hour < 17) return 'Good afternoon'
+  return 'Good evening'
+}
+
+/** Fresh chat state - centered input like Claude */
+function FreshChatState({
+  topicName,
+  onSend,
+  disabled,
+}: {
+  topicName: string
+  onSend: (message: string) => void
+  disabled: boolean
+}) {
+  return (
+    <div className="flex-1 flex flex-col items-center justify-center px-6">
+      {/* Greeting */}
+      <div className="flex items-center gap-3 mb-8">
+        <SparkIcon className="w-8 h-8 text-[var(--accent)]" />
+        <h1 className="text-3xl font-medium text-[var(--foreground)]">
+          {getGreeting()}
+        </h1>
+      </div>
+
+      {/* Topic context */}
+      <p className="text-[15px] text-[var(--foreground-secondary)] mb-8">
+        Let&apos;s explore <span className="font-medium text-[var(--foreground)]">{topicName}</span>
+      </p>
+
+      {/* Centered input */}
+      <div className="w-full max-w-2xl">
+        <ChatInput onSend={onSend} disabled={disabled} placeholder="How can I help you today?" />
+      </div>
     </div>
   )
 }
@@ -141,30 +197,37 @@ export function ChatView() {
     }
   }
 
+  // No conversation selected
   if (!conversation) {
     return (
       <div className="flex-1 flex flex-col bg-[var(--background)]">
-        <EmptyState onNewChat={handleNewChat} />
+        <NoConversationState onNewChat={handleNewChat} />
       </div>
     )
   }
 
+  // Fresh conversation with no messages - centered layout like Claude
+  if (conversation.messages.length === 0 && !isLoading) {
+    return (
+      <div className="flex-1 flex flex-col bg-[var(--background)]">
+        <FreshChatState
+          topicName={topic?.name || 'this topic'}
+          onSend={handleSend}
+          disabled={isLoading}
+        />
+      </div>
+    )
+  }
+
+  // Conversation with messages - traditional layout
   return (
     <div className="flex-1 flex flex-col bg-[var(--background)]">
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-6">
-        <div className="max-w-2xl mx-auto space-y-4">
-          {conversation.messages.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-sm text-white/40">
-                Start the conversation by typing a message below
-              </p>
-            </div>
-          ) : (
-            conversation.messages.map((message) => (
-              <ChatMessage key={message.id} message={message} />
-            ))
-          )}
+      <div className="flex-1 overflow-y-auto custom-scrollbar">
+        <div className="max-w-2xl mx-auto px-6 py-8 space-y-6">
+          {conversation.messages.map((message) => (
+            <ChatMessage key={message.id} message={message} />
+          ))}
 
           {isLoading && <TypingIndicator />}
 
