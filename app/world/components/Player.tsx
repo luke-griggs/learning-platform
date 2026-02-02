@@ -1,77 +1,110 @@
 'use client'
 
-import { useCallback, useRef } from 'react'
-import { Graphics } from 'pixi.js'
+import { useRef, useState } from 'react'
+import { extend } from '@pixi/react'
+import { Container, Sprite } from 'pixi.js'
 import { useTick } from '@pixi/react'
 import { useUserStore } from '@/app/lib/store'
-import { WORLD_CONFIG } from '../constants'
+import {
+  type Direction,
+  DEFAULT_DIRECTION,
+  FRAME_DURATION_MS,
+  getCharacterFrames,
+  getDirectionFromInput,
+  areCharacterAssetsLoaded,
+} from '../lib/characterAssetLoader'
+import type { InputState } from '../types'
 
-// Trail config: size ratio and color (black to gray gradient)
-const TRAIL_CONFIG = [
-  { sizeRatio: 0.75, color: 0x333333 },
-  { sizeRatio: 0.60, color: 0x666666 },
-  { sizeRatio: 0.45, color: 0x999999 },
-]
+// Register PixiJS components for React (v8 pattern)
+extend({ Container, Sprite })
 
-// How many frames of history to keep
-const HISTORY_LENGTH = 60
-// Which history frames to sample for each trail circle (evenly spaced)
-const TRAIL_SAMPLE_FRAMES = [8, 18, 30]
+// Character sprite scale (these sprites are fairly large)
+const CHARACTER_SCALE = 0.06
 
-interface Position {
-  x: number
-  y: number
+interface PlayerProps {
+  input: InputState
 }
 
 /**
- * Renders the player as a black circle with a trailing effect.
- * Uses position history for perfectly smooth, stable trail movement.
+ * Renders the player as an animated sprite that changes direction based on movement.
+ * Animation cycles through frames at ~0.5s per frame when moving.
  */
-export function Player() {
+export function Player({ input }: PlayerProps) {
   const playerPosition = useUserStore((state) => state.playerPosition)
-  const historyRef = useRef<Position[]>([])
-  const graphicsRef = useRef<Graphics | null>(null)
 
-  useTick(() => {
-    const history = historyRef.current
+  // All animation state in refs to avoid async React state issues
+  const directionRef = useRef<Direction>(DEFAULT_DIRECTION)
+  const currentFrameRef = useRef(0)
+  const animationTimeRef = useRef(0)
+  const isMovingRef = useRef(false)
 
-    // Add current position to history
-    history.unshift({ x: playerPosition.x, y: playerPosition.y })
+  // Force re-render when animation state changes
+  const [renderKey, setRenderKey] = useState(0)
 
-    // Trim history to max length
-    if (history.length > HISTORY_LENGTH) {
-      history.pop()
-    }
+  useTick((ticker) => {
+    if (!areCharacterAssetsLoaded()) return
 
-    // Redraw
-    const g = graphicsRef.current
-    if (g) {
-      g.clear()
-      const radius = WORLD_CONFIG.playerRadius
+    const deltaMS = ticker.deltaMS
 
-      // Draw trail circles (back to front) by sampling history
-      for (let i = TRAIL_CONFIG.length - 1; i >= 0; i--) {
-        const config = TRAIL_CONFIG[i]
-        const frameIndex = TRAIL_SAMPLE_FRAMES[i]
+    // Determine direction directly from input (synchronous, no batching issues)
+    const newDirection = getDirectionFromInput(input)
 
-        // Use historical position if available, otherwise current
-        const pos = history[frameIndex] ?? playerPosition
+    let needsRender = false
 
-        g.setFillStyle({ color: config.color, alpha: 1 })
-        g.circle(pos.x, pos.y, radius * config.sizeRatio)
-        g.fill()
+    if (newDirection) {
+      // Moving - update direction and animate
+      if (newDirection !== directionRef.current) {
+        directionRef.current = newDirection
+        currentFrameRef.current = 0
+        animationTimeRef.current = 0
+        needsRender = true
       }
 
-      // Draw main player circle
-      g.setFillStyle({ color: 0x000000, alpha: 1 })
-      g.circle(playerPosition.x, playerPosition.y, radius)
-      g.fill()
+      // Advance animation timer
+      animationTimeRef.current += deltaMS
+
+      // Check if we should advance to next frame
+      if (animationTimeRef.current >= FRAME_DURATION_MS) {
+        // Use subtraction to preserve timing accuracy
+        animationTimeRef.current -= FRAME_DURATION_MS
+        const frames = getCharacterFrames(directionRef.current)
+        currentFrameRef.current = (currentFrameRef.current + 1) % frames.length
+        needsRender = true
+      }
+
+      isMovingRef.current = true
+    } else {
+      // Not moving - reset to first frame if we were moving
+      if (isMovingRef.current) {
+        currentFrameRef.current = 0
+        animationTimeRef.current = 0
+        needsRender = true
+      }
+      isMovingRef.current = false
+    }
+
+    // Only trigger React re-render when texture actually changes
+    if (needsRender) {
+      setRenderKey((k) => k + 1)
     }
   })
 
-  const draw = useCallback((g: Graphics) => {
-    graphicsRef.current = g
-  }, [])
+  // Get current texture from refs
+  const frames = getCharacterFrames(directionRef.current)
+  const texture = frames[currentFrameRef.current] ?? frames[0]
 
-  return <pixiGraphics draw={draw} />
+  if (!areCharacterAssetsLoaded()) {
+    return null
+  }
+
+  return (
+    <pixiSprite
+      key={renderKey}
+      texture={texture}
+      x={playerPosition.x}
+      y={playerPosition.y}
+      anchor={{ x: 0.5, y: 0.5 }}
+      scale={CHARACTER_SCALE}
+    />
+  )
 }

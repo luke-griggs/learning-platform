@@ -15,6 +15,7 @@ import { TreeContainer } from './trees/TreeContainer'
 import { TrailContainer } from './trails/TrailContainer'
 import { WORLD_CONFIG } from '../constants'
 import { loadTreeAssets } from '../lib/assetLoader'
+import { loadCharacterAssets } from '../lib/characterAssetLoader'
 import { seedDemoTopics, clearSubjectTopics, levelUpExistingTopics } from '@/app/lib/seedDemoData'
 import type { WorldContextValue, RenderableEntity } from '../types'
 
@@ -47,9 +48,11 @@ function WorldContent() {
   const input = useKeyboard()
   useGameLoop({ input })
 
-  // Preload tree assets before rendering
+  // Preload tree and character assets before rendering
   useEffect(() => {
-    loadTreeAssets().then(() => setAssetsReady(true))
+    Promise.all([loadTreeAssets(), loadCharacterAssets()]).then(() =>
+      setAssetsReady(true)
+    )
   }, [])
 
   // Dev mode: Ctrl+Shift+D to seed demo topics, Ctrl+Shift+C to clear
@@ -151,7 +154,7 @@ function WorldContent() {
       ))}
 
       {/* Layer 3: Player */}
-      <Player />
+      <Player input={input} />
 
       {/* Layer 3.5: Orb (when carrying) */}
       <Orb />
